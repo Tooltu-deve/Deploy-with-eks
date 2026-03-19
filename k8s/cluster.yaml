@@ -1,0 +1,13 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: todo-cluster
+  region: ap-southeast-1
+
+managedNodeGroups:
+  - name: todo-nodes
+    instanceType: t4g.small
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 2

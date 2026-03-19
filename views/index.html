@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 540px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #38bdf8;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 32px;
+      font-size: 0.875rem;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #1e293b;
+      border-radius: 10px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: #38bdf8;
+    }
+
+    .input-group input::placeholder { color: #475569; }
+
+    .btn-add {
+      padding: 12px 24px;
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover { background: #7dd3fc; }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #1e293b;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .todo-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #1e293b;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+
+    .todo-item:hover { background: #253247; }
+
+    .todo-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #38bdf8;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .todo-item .title {
+      flex: 1;
+      font-size: 1rem;
+      word-break: break-word;
+    }
+
+    .todo-item.completed .title {
+      text-decoration: line-through;
+      color: #475569;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #475569;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      line-height: 1;
+    }
+
+    .btn-delete:hover {
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 0;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Todo List</h1>
+    <p class="subtitle">A simple app for learning EKS deployment</p>
+
+    <div class="input-group">
+      <input type="text" id="todoInput" placeholder="What needs to be done?" />
+      <button class="btn-add" onclick="addTodo()">Add</button>
+    </div>
+
+    <div class="stats">
+      <span id="statsTotal">0 tasks</span>
+      <span id="statsCompleted">0 completed</span>
+    </div>
+
+    <ul class="todo-list" id="todoList"></ul>
+  </div>
+
+  <script>
+    const todoInput = document.getElementById("todoInput");
+    const todoList = document.getElementById("todoList");
+
+    todoInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addTodo();
+    });
+
+    async function fetchTodos() {
+      const res = await fetch("/api/todos");
+      const todos = await res.json();
+      render(todos);
+    }
+
+    async function addTodo() {
+      const title = todoInput.value.trim();
+      if (!title) return;
+      await fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      todoInput.value = "";
+      fetchTodos();
+    }
+
+    async function toggleTodo(id, completed) {
+      await fetch(`/api/todos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed }),
+      });
+      fetchTodos();
+    }
+
+    async function deleteTodo(id) {
+      await fetch(`/api/todos/${id}`, { method: "DELETE" });
+      fetchTodos();
+    }
+
+    function render(todos) {
+      const total = todos.length;
+      const completed = todos.filter((t) => t.completed).length;
+      document.getElementById("statsTotal").textContent = `${total} task${total !== 1 ? "s" : ""}`;
+      document.getElementById("statsCompleted").textContent = `${completed} completed`;
+
+      if (total === 0) {
+        todoList.innerHTML = '<li class="empty">No todos yet. Add one above!</li>';
+        return;
+      }
+
+      todoList.innerHTML = todos
+        .map(
+          (t) => `
+        <li class="todo-item ${t.completed ? "completed" : ""}">
+          <input type="checkbox" ${t.completed ? "checked" : ""}
+            onchange="toggleTodo(${t.id}, this.checked)" />
+          <span class="title">${escapeHtml(t.title)}</span>
+          <button class="btn-delete" onclick="deleteTodo(${t.id})">&#x2715;</button>
+        </li>`
+        )
+        .join("");
+    }
+
+    function escapeHtml(text) {
+      const d = document.createElement("div");
+      d.textContent = text;
+      return d.innerHTML;
+    }
+
+    fetchTodos();
+  </script>
+</body>
+</html>
