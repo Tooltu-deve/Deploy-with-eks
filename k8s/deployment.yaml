@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: todo-app
-          image: tooltu/todov2:d78b4a1
+          image: tooltu/todov2:9f6e06c
           ports:
             - containerPort: 3000
           resources:
