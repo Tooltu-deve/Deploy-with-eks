@@ -17,30 +17,27 @@
       padding: 40px 16px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 540px;
-    }
+    .container { width: 100%; max-width: 600px; }
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 700;
       text-align: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       color: #38bdf8;
     }
 
     .subtitle {
       text-align: center;
       color: #64748b;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       font-size: 0.875rem;
     }
 
     .input-group {
       display: flex;
       gap: 8px;
-      margin-bottom: 24px;
+      margin-bottom: 12px;
     }
 
     .input-group input {
@@ -55,34 +52,92 @@
       transition: border-color 0.2s;
     }
 
-    .input-group input:focus {
-      border-color: #38bdf8;
-    }
-
+    .input-group input:focus { border-color: #38bdf8; }
     .input-group input::placeholder { color: #475569; }
 
-    .btn-add {
-      padding: 12px 24px;
-      background: #38bdf8;
-      color: #0f172a;
+    .input-row-2 {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px 14px;
+      border: 2px solid #1e293b;
+      border-radius: 10px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus { border-color: #38bdf8; }
+
+    .btn {
+      padding: 10px 20px;
       border: none;
       border-radius: 10px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
       white-space: nowrap;
     }
 
-    .btn-add:hover { background: #7dd3fc; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #38bdf8; color: #0f172a; }
+    .btn-primary:hover { background: #7dd3fc; }
+    .btn-danger { background: #1e293b; color: #f87171; font-weight: 500; font-size: 0.85rem; padding: 8px 14px; }
+    .btn-danger:hover { background: #2a1519; }
 
-    .stats {
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .toolbar .search-box {
+      flex: 1;
+      min-width: 140px;
+      padding: 9px 14px;
+      border: 2px solid #1e293b;
+      border-radius: 10px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .toolbar .search-box:focus { border-color: #38bdf8; }
+    .toolbar .search-box::placeholder { color: #475569; }
+
+    .filter-btn {
+      padding: 7px 14px;
+      border: 2px solid #1e293b;
+      border-radius: 8px;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover { border-color: #334155; color: #e2e8f0; }
+    .filter-btn.active { border-color: #38bdf8; color: #38bdf8; background: rgba(56, 189, 248, 0.08); }
+
+    .stats-bar {
       display: flex;
       justify-content: space-between;
-      padding: 12px 0;
-      margin-bottom: 16px;
+      align-items: center;
+      padding: 10px 0;
+      margin-bottom: 12px;
       border-bottom: 1px solid #1e293b;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #64748b;
     }
 
@@ -90,17 +145,23 @@
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .todo-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 16px;
+      padding: 13px 16px;
       background: #1e293b;
       border-radius: 10px;
-      transition: background 0.15s;
+      transition: background 0.15s, opacity 0.3s, transform 0.3s;
+      animation: slideIn 0.25s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .todo-item:hover { background: #253247; }
@@ -115,8 +176,25 @@
 
     .todo-item .title {
       flex: 1;
-      font-size: 1rem;
+      font-size: 0.95rem;
       word-break: break-word;
+      cursor: text;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .todo-item .title:hover { background: rgba(255,255,255,0.04); }
+
+    .todo-item .title-edit {
+      flex: 1;
+      font-size: 0.95rem;
+      padding: 4px 8px;
+      border: 2px solid #38bdf8;
+      border-radius: 6px;
+      background: #0f172a;
+      color: #e2e8f0;
+      outline: none;
     }
 
     .todo-item.completed .title {
@@ -124,71 +202,156 @@
       color: #475569;
     }
 
-    .btn-delete {
+    .priority-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .priority-high { background: rgba(248,113,113,0.15); color: #f87171; }
+    .priority-medium { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .priority-low { background: rgba(52,211,153,0.15); color: #34d399; }
+
+    .btn-icon {
       background: none;
       border: none;
       color: #475569;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
-      padding: 4px 8px;
+      padding: 4px 7px;
       border-radius: 6px;
       transition: color 0.2s, background 0.2s;
       line-height: 1;
     }
 
-    .btn-delete:hover {
-      color: #f87171;
-      background: rgba(248, 113, 113, 0.1);
-    }
+    .btn-icon:hover { color: #f87171; background: rgba(248,113,113,0.1); }
 
-    .empty {
+    .empty-state {
       text-align: center;
-      padding: 40px 0;
+      padding: 50px 0;
       color: #475569;
     }
+
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.95rem; }
+
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 1000;
+    }
+
+    .toast {
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      color: #e2e8f0;
+      background: #334155;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.5s forwards;
+    }
+
+    @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(10px); } }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Todo List</h1>
-    <p class="subtitle">A simple app for learning EKS deployment</p>
+    <p class="subtitle">Task manager &mdash; click a title to edit, use filters to organize</p>
 
     <div class="input-group">
-      <input type="text" id="todoInput" placeholder="What needs to be done?" />
-      <button class="btn-add" onclick="addTodo()">Add</button>
+      <input type="text" id="todoInput" placeholder="What needs to be done?" maxlength="200" />
+      <button class="btn btn-primary" onclick="addTodo()">Add</button>
     </div>
 
-    <div class="stats">
-      <span id="statsTotal">0 tasks</span>
-      <span id="statsCompleted">0 completed</span>
+    <div class="input-row-2">
+      <select id="prioritySelect">
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+        <option value="low">Low</option>
+      </select>
+      <select id="sortSelect" onchange="fetchTodos()">
+        <option value="created">Newest first</option>
+        <option value="title">A &rarr; Z</option>
+      </select>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="search-box" id="searchBox" placeholder="Search todos..." oninput="fetchTodos()" />
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+      <button class="filter-btn" data-filter="active" onclick="setFilter('active')">Active</button>
+      <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Done</button>
+    </div>
+
+    <div class="stats-bar">
+      <span id="statsInfo">0 tasks</span>
+      <button class="btn-danger" id="clearBtn" onclick="clearCompleted()" style="display:none;">Clear completed</button>
     </div>
 
     <ul class="todo-list" id="todoList"></ul>
   </div>
 
+  <div class="toast-container" id="toastContainer"></div>
+
   <script>
     const todoInput = document.getElementById("todoInput");
     const todoList = document.getElementById("todoList");
+    const searchBox = document.getElementById("searchBox");
+    const sortSelect = document.getElementById("sortSelect");
+    const prioritySelect = document.getElementById("prioritySelect");
+    let currentFilter = "all";
 
     todoInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") addTodo();
     });
 
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.filter === filter);
+      });
+      fetchTodos();
+    }
+
     async function fetchTodos() {
-      const res = await fetch("/api/todos");
-      const todos = await res.json();
-      render(todos);
+      const params = new URLSearchParams();
+      if (currentFilter !== "all") params.set("status", currentFilter);
+      if (searchBox.value.trim()) params.set("search", searchBox.value.trim());
+      params.set("sort", sortSelect.value);
+
+      const res = await fetch(`/api/todos?${params}`);
+      const data = await res.json();
+      render(data.todos, data.meta);
     }
 
     async function addTodo() {
       const title = todoInput.value.trim();
       if (!title) return;
-      await fetch("/api/todos", {
+      const priority = prioritySelect.value;
+
+      const res = await fetch("/api/todos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ title, priority }),
       });
+
+      if (!res.ok) {
+        const err = await res.json();
+        showToast(err.error);
+        return;
+      }
+
       todoInput.value = "";
+      showToast("Todo added");
       fetchTodos();
     }
 
@@ -203,28 +366,71 @@
 
     async function deleteTodo(id) {
       await fetch(`/api/todos/${id}`, { method: "DELETE" });
+      showToast("Todo deleted");
       fetchTodos();
     }
 
-    function render(todos) {
-      const total = todos.length;
-      const completed = todos.filter((t) => t.completed).length;
-      document.getElementById("statsTotal").textContent = `${total} task${total !== 1 ? "s" : ""}`;
-      document.getElementById("statsCompleted").textContent = `${completed} completed`;
+    async function clearCompleted() {
+      await fetch("/api/todos?completed=true", { method: "DELETE" });
+      showToast("Completed todos cleared");
+      fetchTodos();
+    }
 
-      if (total === 0) {
-        todoList.innerHTML = '<li class="empty">No todos yet. Add one above!</li>';
+    function startEdit(id, currentTitle) {
+      const span = document.querySelector(`[data-id="${id}"] .title`);
+      if (!span) return;
+      const input = document.createElement("input");
+      input.className = "title-edit";
+      input.value = currentTitle;
+      input.maxLength = 200;
+      span.replaceWith(input);
+      input.focus();
+      input.select();
+
+      const save = async () => {
+        const newTitle = input.value.trim();
+        if (newTitle && newTitle !== currentTitle) {
+          await fetch(`/api/todos/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle }),
+          });
+          showToast("Todo updated");
+        }
+        fetchTodos();
+      };
+
+      input.addEventListener("blur", save);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") input.blur();
+        if (e.key === "Escape") { input.value = currentTitle; input.blur(); }
+      });
+    }
+
+    function render(todos, meta) {
+      const statsInfo = document.getElementById("statsInfo");
+      const clearBtn = document.getElementById("clearBtn");
+
+      statsInfo.textContent = `${meta.showing} of ${meta.total} task${meta.total !== 1 ? "s" : ""} \u2022 ${meta.active} active, ${meta.completed} done`;
+      clearBtn.style.display = meta.completed > 0 ? "block" : "none";
+
+      if (todos.length === 0) {
+        const msg = meta.total === 0
+          ? "No todos yet. Add one above!"
+          : "No matches found.";
+        todoList.innerHTML = `<li class="empty-state"><div class="icon">\u{1F4CB}</div><p>${msg}</p></li>`;
         return;
       }
 
       todoList.innerHTML = todos
         .map(
           (t) => `
-        <li class="todo-item ${t.completed ? "completed" : ""}">
+        <li class="todo-item ${t.completed ? "completed" : ""}" data-id="${t.id}">
           <input type="checkbox" ${t.completed ? "checked" : ""}
             onchange="toggleTodo(${t.id}, this.checked)" />
-          <span class="title">${escapeHtml(t.title)}</span>
-          <button class="btn-delete" onclick="deleteTodo(${t.id})">&#x2715;</button>
+          <span class="title" onclick="startEdit(${t.id}, '${escapeAttr(t.title)}')">${escapeHtml(t.title)}</span>
+          <span class="priority-badge priority-${t.priority}">${t.priority}</span>
+          <button class="btn-icon" onclick="deleteTodo(${t.id})">&#x2715;</button>
         </li>`
         )
         .join("");
@@ -234,6 +440,19 @@
       const d = document.createElement("div");
       d.textContent = text;
       return d.innerHTML;
+    }
+
+    function escapeAttr(text) {
+      return text.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
 
     fetchTodos();
