@@ -89,6 +89,7 @@
     .btn:active { transform: scale(0.97); }
     .btn-primary { background: #38bdf8; color: #0f172a; }
     .btn-primary:hover { background: #7dd3fc; }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
     .btn-danger { background: #1e293b; color: #f87171; font-weight: 500; font-size: 0.85rem; padding: 8px 14px; }
     .btn-danger:hover { background: #2a1519; }
 
@@ -202,6 +203,40 @@
       color: #475569;
     }
 
+    .todo-item.pinned {
+      box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.35);
+      background: #1e293b;
+    }
+
+    .btn-pin {
+      background: none;
+      border: none;
+      font-size: 1.05rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      line-height: 1;
+      color: #64748b;
+      opacity: 0.7;
+      transition: color 0.2s, opacity 0.2s, filter 0.2s, transform 0.15s;
+    }
+
+    .btn-pin:hover {
+      opacity: 1;
+      color: #94a3b8;
+    }
+
+    .btn-pin.is-pinned {
+      opacity: 1;
+      color: #fbbf24;
+      filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.85));
+    }
+
+    .btn-pin.is-pinned:hover {
+      color: #fcd34d;
+      filter: drop-shadow(0 0 10px rgba(252, 211, 77, 0.9));
+    }
+
     .priority-badge {
       font-size: 0.7rem;
       font-weight: 600;
@@ -266,11 +301,11 @@
 <body>
   <div class="container">
     <h1>Todo List</h1>
-    <p class="subtitle">Task manager &mdash; click a title to edit, use filters to organize</p>
+    <p class="subtitle">Task manager &mdash; click a title to edit; <strong>star</strong> to pin important tasks to the top</p>
 
     <div class="input-group">
-      <input type="text" id="todoInput" placeholder="What needs to be done?" maxlength="200" />
-      <button class="btn btn-primary" onclick="addTodo()">Add</button>
+      <input type="text" id="todoInput" placeholder="What needs to be done?" maxlength="200" autocomplete="off" />
+      <button type="button" class="btn btn-primary" id="addBtn">Add</button>
     </div>
 
     <div class="input-row-2">
@@ -308,11 +343,17 @@
     const searchBox = document.getElementById("searchBox");
     const sortSelect = document.getElementById("sortSelect");
     const prioritySelect = document.getElementById("prioritySelect");
+    const addBtn = document.getElementById("addBtn");
     let currentFilter = "all";
+    let addInFlight = false;
 
     todoInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") addTodo();
+      if (e.key !== "Enter" || e.isComposing) return;
+      e.preventDefault();
+      addTodo();
     });
+
+    addBtn.addEventListener("click", () => addTodo());
 
     function setFilter(filter) {
       currentFilter = filter;
@@ -335,24 +376,32 @@
 
     async function addTodo() {
       const title = todoInput.value.trim();
-      if (!title) return;
+      if (!title || addInFlight) return;
+
+      addInFlight = true;
+      addBtn.disabled = true;
       const priority = prioritySelect.value;
 
-      const res = await fetch("/api/todos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, priority }),
-      });
+      try {
+        const res = await fetch("/api/todos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, priority }),
+        });
 
-      if (!res.ok) {
-        const err = await res.json();
-        showToast(err.error);
-        return;
+        if (!res.ok) {
+          const err = await res.json();
+          showToast(err.error);
+          return;
+        }
+
+        todoInput.value = "";
+        showToast("Todo added");
+        await fetchTodos();
+      } finally {
+        addInFlight = false;
+        addBtn.disabled = false;
       }
-
-      todoInput.value = "";
-      showToast("Todo added");
-      fetchTodos();
     }
 
     async function toggleTodo(id, completed) {
@@ -361,6 +410,16 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed }),
       });
+      fetchTodos();
+    }
+
+    async function togglePin(id, pinned) {
+      await fetch(`/api/todos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned }),
+      });
+      showToast(pinned ? "Pinned to top" : "Unpinned");
       fetchTodos();
     }
 
@@ -425,9 +484,11 @@
       todoList.innerHTML = todos
         .map(
           (t) => `
-        <li class="todo-item ${t.completed ? "completed" : ""}" data-id="${t.id}">
+        <li class="todo-item ${t.completed ? "completed" : ""} ${t.pinned ? "pinned" : ""}" data-id="${t.id}">
           <input type="checkbox" ${t.completed ? "checked" : ""}
             onchange="toggleTodo(${t.id}, this.checked)" />
+          <button type="button" class="btn-pin ${t.pinned ? "is-pinned" : ""}" title="${t.pinned ? "Unpin" : "Pin to top"}"
+            onclick="togglePin(${t.id}, ${t.pinned ? "false" : "true"})">\u2605</button>
           <span class="title" onclick="startEdit(${t.id}, '${escapeAttr(t.title)}')">${escapeHtml(t.title)}</span>
           <span class="priority-badge priority-${t.priority}">${t.priority}</span>
           <button class="btn-icon" onclick="deleteTodo(${t.id})">&#x2715;</button>

@@ -25,6 +25,7 @@ describe("POST /api/todos", () => {
     expect(res.body.title).toBe("Write tests");
     expect(res.body.completed).toBe(false);
     expect(res.body.priority).toBe("medium");
+    expect(res.body.pinned).toBe(false);
     expect(res.body).toHaveProperty("id");
     expect(res.body).toHaveProperty("createdAt");
   });
@@ -137,6 +138,22 @@ describe("GET /api/todos", () => {
     const titles = res.body.todos.map((t) => t.title);
     expect(titles).toEqual(["Gamma", "Beta", "Alpha"]);
   });
+
+  it("pinned todos appear first when sorting by created date", async () => {
+    await request(app).patch("/api/todos/1").send({ pinned: true });
+
+    const res = await request(app).get("/api/todos");
+    const titles = res.body.todos.map((t) => t.title);
+    expect(titles).toEqual(["Alpha", "Gamma", "Beta"]);
+  });
+
+  it("pinned todos appear first when sorting by title", async () => {
+    await request(app).patch("/api/todos/3").send({ pinned: true });
+
+    const res = await request(app).get("/api/todos?sort=title");
+    const titles = res.body.todos.map((t) => t.title);
+    expect(titles).toEqual(["Gamma", "Alpha", "Beta"]);
+  });
 });
 
 describe("GET /api/todos/:id", () => {
@@ -175,6 +192,21 @@ describe("PATCH /api/todos/:id", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.completed).toBe(true);
+  });
+
+  it("toggles pinned", async () => {
+    const res = await request(app)
+      .patch("/api/todos/1")
+      .send({ pinned: true });
+
+    expect(res.status).toBe(200);
+    expect(res.body.pinned).toBe(true);
+
+    const off = await request(app)
+      .patch("/api/todos/1")
+      .send({ pinned: false });
+
+    expect(off.body.pinned).toBe(false);
   });
 
   it("updates priority", async () => {

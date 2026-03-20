@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const pkg = require("./package.json");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,9 +32,15 @@ app.get("/api/todos", (req, res) => {
   }
 
   if (req.query.sort === "title") {
-    result.sort((a, b) => a.title.localeCompare(b.title));
+    result.sort((a, b) => {
+      if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+      return a.title.localeCompare(b.title);
+    });
   } else {
-    result.sort((a, b) => b.createdAt - a.createdAt);
+    result.sort((a, b) => {
+      if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+      return b.createdAt - a.createdAt;
+    });
   }
 
   res.json({
@@ -70,6 +77,7 @@ app.post("/api/todos", (req, res) => {
     id: nextId++,
     title: title.trim(),
     completed: false,
+    pinned: false,
     priority: todoPriority,
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -99,6 +107,7 @@ app.patch("/api/todos/:id", (req, res) => {
     }
     todo.priority = req.body.priority;
   }
+  if (req.body.pinned !== undefined) todo.pinned = Boolean(req.body.pinned);
 
   todo.updatedAt = Date.now();
   res.json(todo);
@@ -125,7 +134,7 @@ app.get("/health", (_req, res) => {
     status: "ok",
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
-    version: process.env.APP_VERSION || "1.0.0",
+    version: process.env.APP_VERSION || pkg.version,
   });
 });
 
